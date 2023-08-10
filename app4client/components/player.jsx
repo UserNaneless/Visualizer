@@ -197,6 +197,7 @@ export default function Player(props) {
     useEffect(() => {
         props.setVideo(audioBuffer);
         setServer(window.location.href + "/api");
+        console.log(window.location.href + "/api");
         scrollTitle();
     }, [])
 
