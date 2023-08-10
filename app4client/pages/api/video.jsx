@@ -29,8 +29,10 @@ export default async function  handler(req, res) {
             ytdl.downloadFromInfo(info, {
                 filter: "audioonly",
                 quality: "highestaudio"
-            }).pipe(throttle).pipe(res)
+            }).pipe(throttle).pipe(res);
         }
 
     }
+
+    return new Response(res);
 }
