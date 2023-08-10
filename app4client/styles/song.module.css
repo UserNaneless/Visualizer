@@ -1,0 +1,42 @@
+.songMain{
+    width: 100%;
+    height: 50px;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    padding: 0 10px;
+    border-radius: 7px;
+    color: var(--text-color);
+    transition: transform .7s;
+}
+
+.songMain:hover{
+    background-color: #ededed !important;
+    cursor: pointer !important;
+    color: black !important;
+}
+
+.songThumbnail{
+    height: 40px;
+    width: 80%;
+    background-size: cover;
+    background-position: center;
+    align-self: center;
+    justify-self: center;
+    border-radius: 7px;
+}
+
+.songTitle{
+    max-width: 100%;
+    height: 100%;
+    line-height: 50px;
+    text-align: center;
+    align-self: center;
+    overflow: hidden;
+    font-size: .9em;
+}
+
+.songDuration{
+    text-align: center;
+    align-self: center;
+    font-size: .8em;
+}

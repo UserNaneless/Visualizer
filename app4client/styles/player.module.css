@@ -1,0 +1,316 @@
+.playerWrapper {
+    position: absolute;
+    width: 100%;
+    top: 0;
+}
+
+.audioSettings {
+    width: 620px;
+    height: 100px;
+    margin: 30px auto;
+    position: relative;
+    transform: translateY(-200px);
+    transition: transform .9s ease-out;
+    color: var(--text-color);
+
+}
+
+.audioSettings>* {
+    background-color: var(--bg-color);
+}
+
+.audioSettingsCentral {
+    margin: 0 auto;
+    width: 500px;
+    height: 50px;
+    border-radius: 7px;
+    box-shadow: 4px 4px 8px -2px rgba(34, 60, 80, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+
+.musicForm {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    padding: 0 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    transition: opacity .5s;
+    position: absolute;
+}
+
+.musicInput {
+    outline: none;
+    border: 1px solid lightgrey;
+    border-radius: 7px;
+    height: 30px;
+    width: 80%;
+    padding: 0 10px;
+    color: var(--text-color);
+    
+}
+
+.musicButton {
+    background-color: var(--bg-color);
+    border: none;
+    border-radius: 7px;
+    box-shadow: 4px 4px 8px -3px rgba(34, 60, 80, 0.2);
+    width: 80px;
+    height: 30px;
+    color: var(--text-color);
+
+}
+
+.musicButton:hover {
+    cursor: pointer;
+    box-shadow: 4px 4px 8px -3px rgba(34, 60, 80, 0.8);
+}
+
+.musicButton:active {
+    background-color: #767676;
+    color: white;
+}
+
+.playlistOpener{
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: -40px;
+    top: 10px;
+    border-radius: 7px;
+    box-shadow: 4px 4px 8px -2px rgba(34, 60, 80, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .3s;
+}
+
+.playlistOpener:hover {
+    cursor: pointer;
+    background-color: #767676;
+    color: white;
+}
+
+
+.startButton {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 7px;
+    box-shadow: 4px 4px 8px -2px rgba(34, 60, 80, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .3s;
+}
+
+.startButton:hover {
+    cursor: pointer;
+    background-color: #767676;
+    color: white;
+}
+
+.startRed {
+    width: 30px;
+    height: 30px;
+    display: none;
+    font-size: 25px;
+    text-align: center;
+    line-height: 30px;
+}
+
+.stopRed {
+    width: 30px;
+    height: 30px;
+    display: block;
+
+    font-size: 30px;
+    text-align: center;
+    line-height: 30px;
+}
+
+
+.addNewAudio {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    border-radius: 7px;
+    box-shadow: 4px 4px 8px -2px rgba(34, 60, 80, 0.2);
+    text-align: center;
+    line-height: 50px;
+    font-size: 30px;
+    transition: all .3s;
+    
+}
+
+.addNewAudio:hover {
+    cursor: pointer;
+    background-color: #767676;
+    color: white;
+}
+
+.currentlyPlaying {
+    width: 100%;
+    height: 100%;
+    padding: 0 10px;
+    position: absolute;
+    opacity: 0;
+
+    transition: opacity .5s;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template: "image top top volume" minmax(0, 1fr) "image bottom bottom volume" minmax(0, 1fr)
+}
+
+.currentlyPlayingTitle {
+    width: 125px;
+    height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.currentlyPlayingInfo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 5px;
+    grid-area: top;
+}
+
+.currentPlayingTimeBar {
+    width: 100%;
+    height: 5px;
+    background-color: #f2f8fb;
+    border-radius: 7px;
+    margin-top: 10px;
+    grid-area: bottom;
+    position: relative;
+    --time-width: 50%;
+}
+
+.currentPlayingTimeBar:before {
+    position: absolute;
+    content: "";
+    display: block;
+    width: var(--time-width);
+    height: 100%;
+    border-radius: 7px;
+    background-color: #8AADEB;
+}
+
+.currentPlayingTime {
+    width: 80px;
+    font-size: .8em;
+    text-align: center;
+}
+
+.img {
+    background-image: url("https://www.thoughtco.com/thmb/g8h6NnWWWVkm-KXNBgMx-0Edd2U=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages_482194715-56a1329e5f9b58b7d0bcf666.jpg");
+    background-size: cover;
+    background-position: center;
+    border-radius: 7px;
+    width: 80%;
+    height: 40px;
+    justify-self: center;
+    align-self: center;
+    grid-area: image;
+}
+
+.volume {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: column;
+    grid-area: volume;
+    position: relative;
+
+}
+
+.musicSteps{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    top: 5px;
+    color: var(--text-color)
+}
+
+.musicSteps > * {
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+}
+
+.musicSteps > *:hover {
+    color: white;
+    cursor: pointer;
+    background-color: var(--text-color);
+}
+
+.volumeBar {
+    width: 70%;
+    height: 5px;
+    background-color: #f2f8fb;
+    border-radius: 7px;
+    margin-top: 25px;
+    position: relative;
+    --time-width: 100%;
+}
+
+.volumeBar:before {
+    position: absolute;
+    content: "";
+    display: block;
+    width: var(--time-width);
+    height: 100%;
+    border-radius: 7px;
+    background-color: #8AADEB;
+}
+
+.plusRotator {
+    width: 100%;
+    height: 100%;
+    transition: transform .5s;
+}
+
+.video {
+    position: absolute;
+    top: -9999px;
+}
+
+.loader {
+    animation: spin 1.2s infinite linear;
+}
+
+
+.dropDown {
+    transform: translateY(0);
+}
+
+
+
+@keyframes spin {
+    from {
+        transform: rotateZ(0deg);
+    }
+
+    to {
+        transform: rotateZ(360deg);
+    }
+}
