@@ -95,6 +95,5 @@ app.get("/videoInfo", async (req, res) => {
     }
 })
 
-app.listen(port, () => {
-    console.log("Hello world1");
-})
+
+module.exports = app;
