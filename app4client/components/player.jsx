@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { faPlus, faPause, faPlay, faCircleNotch, faForwardStep, faBackwardStep, faList } from '@fortawesome/free-solid-svg-icons';
 import Playlist from './playlist';
+import { useRouter } from 'next/router';
 
 config.autoAddCss = false
 
@@ -29,10 +30,9 @@ let volumeDrag = false;
 
 let scrollTitleEnd = 1;
 
-var server = "https://functionality-edmonton-subsection-motors.trycloudflare.com"; //"http://localhost:8000"
 
 export default function Player(props) {
-
+    const [server, setServer] = useState("");
     const video = useRef();
     const video1 = useRef();
     const inputUrl = useRef();
@@ -196,7 +196,7 @@ export default function Player(props) {
 
     useEffect(() => {
         props.setVideo(audioBuffer);
-
+        setServer(window.location.href + "/api");
         scrollTitle();
     }, [])
 
