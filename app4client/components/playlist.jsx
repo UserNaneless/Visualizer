@@ -4,7 +4,6 @@ import styles from "../styles/playlist.module.css"
 import Song from './song';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowsRotate, faShuffle, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
-import html2canvas from 'html2canvas';
 
 
 export default function Playlist({ playlist, songOnClick, playlistShuffle, setPlaylist, setLooped, looped, playlistOpened }) {
