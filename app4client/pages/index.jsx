@@ -68,6 +68,8 @@ const average = (array) => {
     return array.reduce((a, b) => a + b, 0) / array.length;
 }
 
+let verticies = [];
+
 const DrawRectGL = (canvas, posX, posY, size) => {
     if (gl) {
         const sizeLoc = gl.getUniformLocation(prog, "size");
@@ -98,7 +100,6 @@ class Particle {
     draw = (canvas) => {
         // context.fillStyle = this.color;
         // context.fillRect(this.x, this.y, particleSize, particleSize);
-        DrawRectGL(canvas, this.x, this.y, particleSize);
 
         if (!this.comeback) {
             this.velocity[0] = this.move(this.velocity[0]);
@@ -173,9 +174,11 @@ export default function Home() {
 
     const createParticles = useCallback(() => {
         let newParticles = [];
-        for (let x = 0; x < window.innerWidth / 10; x++) {
-            for (let y = 0; y < window.innerHeight / 10; y++) {
-                newParticles.push(new Particle(x * particleSize, y * particleSize));
+        for (let x = 0; x < window.innerWidth / 1; x++) {
+            for (let y = 0; y < window.innerHeight / 1; y++) {
+                newParticles.push(new Particle(x, y));
+                verticies.push(x / canvas.current.width * 2 - 1);
+                verticies.push(y / canvas.current.height * 2 - 1);
             }
         }
         setParticles(newParticles);
@@ -186,7 +189,10 @@ export default function Home() {
         while (i--) {
             particles[i].draw(canvas.current);
         }
-        console.log("123");
+
+        const timeLoc = gl.getUniformLocation(prog, 'time');
+        gl.uniform1f(timeLoc, performance.now() / 1000);
+        gl.drawArrays(gl.POINTS, 0, particles.length);
     }, [particles.length]);
 
 
@@ -278,15 +284,11 @@ export default function Home() {
 
         in vec2 vertexPos;
 
-        uniform vec2 canvas;
-        uniform vec2 location;
-        uniform float size;
+        uniform float time;
 
         void main() {
-            vec2 pos = vertexPos * size + location;
-            vec2 clipPos = (pos / canvas) * 2.0 - 1.0;
-            clipPos.y *= -1.0;
-            gl_Position = vec4(clipPos, 1.0, 1.0);
+            gl_Position = vec4(cos(time) * vertexPos.x, -vertexPos.y * sin(time), 1.0, 1.0);
+            gl_PointSize = 1.0;
         }
         `;
 
@@ -295,8 +297,10 @@ export default function Home() {
     
         out vec4 outputColor;
 
+        uniform float time;
+
         void main() {
-            outputColor = vec4(1.0, 0.0, 0.0, 1.0);
+            outputColor = vec4(sin(time) * cos(time), 1.0 - sin(time), 1.0 - cos(time), 1.0);
         }
         `;
 
@@ -324,17 +328,10 @@ export default function Home() {
             }
 
             const vertexPositionAttrLoc = gl.getAttribLocation(prog, 'vertexPos');
+            const timeLoc = gl.getUniformLocation(prog, 'time');
 
             gl.useProgram(prog);
             gl.enableVertexAttribArray(vertexPositionAttrLoc);
-
-
-            const verticies = [
-                1, 1,
-                1, -1,
-                -1, -1,
-                -1, 1
-            ].map(item => item / 2);
 
             const buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -350,7 +347,9 @@ export default function Home() {
                 0
             );
 
+            gl.uniform1f(timeLoc, performance.now());
 
+            // gl.drawArrays(gl.POINTS, 0, particles.length);
             startRendering(gl);
         }
     }, [particles.length])
