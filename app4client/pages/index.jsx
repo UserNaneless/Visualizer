@@ -174,8 +174,8 @@ export default function Home() {
 
     const createParticles = useCallback(() => {
         let newParticles = [];
-        for (let x = 0; x < window.innerWidth / 1; x++) {
-            for (let y = 0; y < window.innerHeight / 1; y++) {
+        for (let x = 0; x < window.innerWidth; x++) {
+            for (let y = 0; y < window.innerHeight; y++) {
                 newParticles.push(new Particle(x, y));
                 verticies.push(x / canvas.current.width * 2 - 1);
                 verticies.push(y / canvas.current.height * 2 - 1);
@@ -197,7 +197,12 @@ export default function Home() {
 
 
     const mouseMove = (e) => {
-        runFromMouse(e);
+        // runFromMouse(e);
+        if(gl) {
+            const mouseLoc = gl.getUniformLocation(prog, 'mouse');
+            gl.uniform2f(mouseLoc, e.clientX / canvas.current.width * 2 - 1, e.clientY / canvas.current.height * 2 - 1);
+            // console.log("Pos: ", e.clientX / canvas.current.width * 2 - 1, e.clientY / canvas.current.height * 2 - 1);
+        }
         // if (gl) {
         // const locationLoc = gl.getUniformLocation(prog, "location");
         // gl.uniform2f(locationLoc, e.clientX, e.clientY);
@@ -285,9 +290,15 @@ export default function Home() {
         in vec2 vertexPos;
 
         uniform float time;
+        uniform vec2 mouse;
 
         void main() {
-            gl_Position = vec4(cos(time) * vertexPos.x, -vertexPos.y * sin(time), 1.0, 1.0);
+            vec2 pos = vec2(vertexPos.x, -vertexPos.y);
+            vec2 cMouse = vec2(mouse.x, -mouse.y);
+            if(distance(pos, cMouse) < .2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) {
+                pos -= cMouse;
+            }
+            gl_Position = vec4(pos, 1.0, 1.0);
             gl_PointSize = 1.0;
         }
         `;
@@ -298,9 +309,10 @@ export default function Home() {
         out vec4 outputColor;
 
         uniform float time;
+        uniform vec2 mouse;
 
         void main() {
-            outputColor = vec4(sin(time) * cos(time), 1.0 - sin(time), 1.0 - cos(time), 1.0);
+            outputColor = vec4(mouse - vec2(0.0, 0.0), 1.0 - cos(time), 1.0);
         }
         `;
 
