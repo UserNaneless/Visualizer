@@ -295,7 +295,7 @@ export default function Home() {
         void main() {
             vec2 pos = vec2(vertexPos.x, -vertexPos.y);
             vec2 cMouse = vec2(mouse.x, -mouse.y);
-            if(distance(pos, cMouse) < .2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) {
+            if(distance(pos, cMouse) < .2) {
                 pos -= cMouse;
             }
             gl_Position = vec4(pos, 1.0, 1.0);
