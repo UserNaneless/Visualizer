@@ -59,10 +59,15 @@ const Visualizer = () => {
             if (!gridPoints) return
             gridPoints.collision(e.clientX, e.clientY, (points) => {
                 points.forEach(point => {
-                    point.color = {
-                        r: 255,
-                        g: 0,
-                        b: 0,
+                    const x = point.x - e.clientX;
+                    const y = point.y - e.clientY;
+                    if (x * x + y * y <= 1000) {
+                        console.log(point)
+                        point.color = {
+                            r: 255,
+                            g: 0,
+                            b: 0,
+                        }
                     }
                 })
             })
