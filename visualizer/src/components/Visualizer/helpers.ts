@@ -2,6 +2,7 @@ export type Color = {
     r: number;
     g: number;
     b: number;
+    a?: number;
 }
 
 export type Rect = {
@@ -14,6 +15,11 @@ export type Circle = {
     x: number;
     y: number;
     r: number
+}
+
+export type Velocity = {
+    x: number;
+    y: number
 }
 
 const circleRectCollision = (r: Rect, c: Circle) => {
@@ -38,11 +44,38 @@ export class Point {
     y: number;
     size: number;
     color: Color;
+    velocity: Velocity = {
+        x: 0,
+        y: 0
+    }
+    speed = 10
+    active = false
     constructor(x: number, y: number, w: number, color: Color) {
         this.x = x;
         this.y = y;
         this.size = w;
         this.color = color;
+    }
+
+    speedFrom(x: number, y: number) {
+        if (!this.active) {
+            this.velocity = {
+                x: x - this.x,
+                y: y - this.y
+            }
+
+            const magn = -Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y)
+
+            this.velocity.x /= magn;
+            this.velocity.y /= magn;
+
+            this.active = true;
+        }
+    }
+
+    move() {
+        this.x += this.velocity.x * this.speed;
+        this.y += this.velocity.y * this.speed;
     }
 }
 
@@ -82,7 +115,7 @@ export class Grid {
     drawGrid(ctx: CanvasRenderingContext2D) {
         ctx.clearRect(0, 0, this.gridWidth * this.size, this.gridHeight * this.size);
         this.grid.forEach((cell) => {
-            drawPoints(cell, ctx)
+            drawAndMovePoints(cell, ctx)
         })
     }
 
@@ -121,12 +154,6 @@ export class Grid {
     }
 
     collisionCircle(x: number, y: number, r: number, callback: (points: Point[]) => void) {
-        const gridCoords = this.coordsToGridCoords(x, y);
-        const index = this.gridCoordsToIndex(gridCoords.x, gridCoords.y);
-        const coords = this.indexToGridCoords(index);
-
-        const tester = this.grid[this.gridCoordsToIndex(coords.x, coords.y)];
-
         const circle: Circle = {
             x,
             y,
@@ -144,19 +171,15 @@ export class Grid {
                 points.push(...cell)
             }
             return points
-        }, []).filter(point => {
-            const distX = point.x - circle.x;
-            const distY = point.y - circle.y;
-            return distX * distX + distY * distY <= circle.r * circle.r
-        })
+        }, [])
+        // .filter(point => {
+        //     const distX = point.x - circle.x;
+        //     const distY = point.y - circle.y;
+        //     return distX * distX + distY * distY <= circle.r * circle.r
+        // })
 
 
         callback(points);
-        // callback(tester);
-
-
-
-
     }
 }
 
@@ -170,9 +193,10 @@ const getRandomColor = () => {
 
 const getWhiteColor = () => {
     return {
-        r: 255,
-        g: 255,
+        r: 0,
+        g: 0,
         b: 255,
+        a: 25
     }
 }
 
@@ -186,14 +210,15 @@ const createPoints = (width: number, height: number, size: number) => {
     return points
 }
 
-const drawPoints = (points: Point[], ctx: CanvasRenderingContext2D) => {
+const drawAndMovePoints = (points: Point[], ctx: CanvasRenderingContext2D) => {
     for (const point of points) {
-        ctx.fillStyle = `rgb(${point.color.r}, ${point.color.g}, ${point.color.b})`;
+        ctx.fillStyle = `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, ${point.color?.a || 100}%)`;
         ctx.fillRect(point.x, point.y, point.size, point.size);
+        point.move();
     }
 }
 
 export {
     createPoints,
-    drawPoints
+    drawAndMovePoints
 }

@@ -6,8 +6,6 @@ import useMeasure from 'react-use-measure'
 
 import "./Visualizer.sass"
 
-
-
 const Visualizer = () => {
 
     const [gridPoints, setGridPoints] = useState<Grid | null>(null);
@@ -15,6 +13,8 @@ const Visualizer = () => {
 
     const canvas = useRef<HTMLCanvasElement | null>(null);
     const ctx = useRef<CanvasRenderingContext2D | null>(null);
+
+    const radius = useRef(10);
 
     useEffect(() => {
         ctx.current = canvas.current?.getContext('2d') || null;
@@ -58,16 +58,22 @@ const Visualizer = () => {
         }} width={width} height={height} onMouseMove={(e) => {
             if (!gridPoints) return
 
-            gridPoints.collisionCircle(e.clientX, e.clientY, 10, (points) => {
+            gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (points) => {
                 points.forEach(point => {
                     point.color = {
                         r: 255,
                         g: 0,
-                        b: 0
+                        b: 0,
+                        a: 50
                     }
+                    point.speedFrom(e.clientX, e.clientY)
                 })
             })
-        }}>
+        }}
+            onWheel={(e) => {
+                // radius.current += e.deltaY / 120
+            }}
+        >
 
         </canvas>
     );
