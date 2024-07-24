@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { createPoints, drawPoints, Grid, Point } from "./helpers";
+import { createPoints, Grid } from "./helpers";
 import useMeasure from 'react-use-measure'
 
 import "./Visualizer.sass"
