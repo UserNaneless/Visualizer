@@ -43,12 +43,12 @@ const Visualizer = () => {
 
     }, [ctx.current])
 
-    useEffect(() => {
-        if (!gridPoints) return
-        ctx.current?.clearRect(0, 0, width, height);
-        gridPoints.drawGrid(ctx.current!);
-        gridPoints.drawGridBorders(ctx.current!);
-    }, [gridPoints])
+    // useEffect(() => {
+    // if (!gridPoints) return
+    // ctx.current?.clearRect(0, 0, width, height);
+    // gridPoints.drawGrid(ctx.current!);
+    // gridPoints.drawGridBorders(ctx.current!);
+    // }, [gridPoints])
 
 
     return (
@@ -57,17 +57,13 @@ const Visualizer = () => {
             canvas.current = element;
         }} width={width} height={height} onMouseMove={(e) => {
             if (!gridPoints) return
-            gridPoints.collision(e.clientX, e.clientY, (points) => {
+
+            gridPoints.collisionCircle(e.clientX, e.clientY, 10, (points) => {
                 points.forEach(point => {
-                    const x = point.x - e.clientX;
-                    const y = point.y - e.clientY;
-                    if (x * x + y * y <= 1000) {
-                        console.log(point)
-                        point.color = {
-                            r: 255,
-                            g: 0,
-                            b: 0,
-                        }
+                    point.color = {
+                        r: 255,
+                        g: 0,
+                        b: 0
                     }
                 })
             })

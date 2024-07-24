@@ -4,6 +4,35 @@ export type Color = {
     b: number;
 }
 
+export type Rect = {
+    x: number;
+    y: number;
+    w: number
+}
+
+export type Circle = {
+    x: number;
+    y: number;
+    r: number
+}
+
+const circleRectCollision = (r: Rect, c: Circle) => {
+    let [testX, testY] = [c.x, c.y];
+
+    if (c.x < r.x) testX = r.x;
+    else if (c.x > r.x + r.w) testX = r.x + r.w;
+
+    if (c.y < r.y) testY = r.y;
+    else if (c.y > r.y + r.w) testY = r.y + r.w;
+
+    const distX = c.x - testX;
+    const distY = c.y - testY;
+
+    const distSquared = distX * distX + distY * distY;
+
+    return distSquared <= c.r * c.r
+}
+
 export class Point {
     x: number;
     y: number;
@@ -77,9 +106,57 @@ export class Grid {
         return x + y * this.gridWidth
     }
 
+    indexToGridCoords(index: number) {
+        return {
+            x: index % this.gridWidth,
+            y: Math.floor(index / this.gridWidth)
+        }
+    }
+
     collision(x: number, y: number, callback: (points: Point[]) => void) {
         const gridCoords = this.coordsToGridCoords(x, y)
+
+
         callback(this.grid[this.gridCoordsToIndex(gridCoords.x, gridCoords.y)])
+    }
+
+    collisionCircle(x: number, y: number, r: number, callback: (points: Point[]) => void) {
+        const gridCoords = this.coordsToGridCoords(x, y);
+        const index = this.gridCoordsToIndex(gridCoords.x, gridCoords.y);
+        const coords = this.indexToGridCoords(index);
+
+        const tester = this.grid[this.gridCoordsToIndex(coords.x, coords.y)];
+
+        const circle: Circle = {
+            x,
+            y,
+            r
+        }
+
+        const points = this.grid.reduce((points, cell) => {
+            const rect: Rect = {
+                x: cell[0].x,
+                y: cell[0].y,
+                w: this.size
+            }
+
+            if (circleRectCollision(rect, circle)) {
+                points.push(...cell)
+            }
+            return points
+        }, []).filter(point => {
+            const distX = point.x - circle.x;
+            const distY = point.y - circle.y;
+            return distX * distX + distY * distY <= circle.r * circle.r
+        })
+
+
+        callback(points);
+        // callback(tester);
+
+
+
+
     }
 }
 
@@ -91,11 +168,19 @@ const getRandomColor = () => {
     }
 }
 
+const getWhiteColor = () => {
+    return {
+        r: 255,
+        g: 255,
+        b: 255,
+    }
+}
+
 const createPoints = (width: number, height: number, size: number) => {
     const points: Point[] = [];
     for (let y = 0; y < height / size; y++) {
         for (let x = 0; x < width / size; x++) {
-            points.push(new Point(x * size, y * size, size, getRandomColor()))
+            points.push(new Point(x * size, y * size, size, getWhiteColor()))
         }
     }
     return points
