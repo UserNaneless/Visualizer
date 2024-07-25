@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Grid } from "./helpers";
+import { Grid, PointAction } from "./helpers";
 import useMeasure from 'react-use-measure'
 import { throttle } from "lodash"
 
@@ -9,6 +9,8 @@ import "./Visualizer.sass"
 import { Application } from "pixi.js";
 
 const pointSize = 10;
+const cellSize = 200;
+const fps = 144;
 
 const app = new Application();
 // window.app = app;
@@ -36,6 +38,7 @@ const Visualizer = () => {
                 width,
                 height
             }).then(() => {
+                console.log(app)
                 setLoaded(true);
                 app.renderer.background.color = 0xffffff
             }).catch((err) => {
@@ -50,7 +53,7 @@ const Visualizer = () => {
     useEffect(() => {
         if (!loaded) return
         setGridPoints(() => {
-            const grid = new Grid(width, height, 100).fillGrid(width, height, pointSize).startDrawing(app.stage)
+            const grid = new Grid(width, height, cellSize).fillGrid(width, height, pointSize).startDrawing(app.stage)
 
             app.ticker.add(() => {
                 grid.movePoints();
@@ -97,10 +100,10 @@ const Visualizer = () => {
         gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (points) => {
             // gridPoints.collisionAll(e.clientX, e.clientY, radius.current, (points) => {
             points.forEach(point => {
-                point.speedFrom(e.clientX, e.clientY)
+                point.runFrom(e.clientX, e.clientY)
             })
         })
-    }, 1000 / 144), [gridPoints])
+    }, 1000 / fps), [gridPoints])
 
 
     return (
@@ -121,7 +124,7 @@ const Visualizer = () => {
                                 b: 0,
                                 a: 50
                             }
-                            point.speedFrom(e.touches[0].clientX, e.touches[0].clientY)
+                            point.runFrom(e.touches[0].clientX, e.touches[0].clientY)
                         })
                     })
                 }}

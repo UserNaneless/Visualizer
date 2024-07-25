@@ -41,10 +41,11 @@ const circleRectCollision = (r: Rect, c: Circle) => {
     return distSquared <= c.r * c.r
 }
 
-enum PointAction {
+export enum PointAction {
     NotActive,
     Run,
-    Return
+    Return,
+    Redraw
 }
 
 export class Point {
@@ -63,8 +64,8 @@ export class Point {
         x: 0,
         y: 0
     }
-    speed = 10
-    maxSpeed = 10
+    speed = 4
+    maxSpeed = 4
     state = PointAction.NotActive
     constructor(x: number, y: number, w: number, color: Color, parent: GraphicsContext) {
         this.x = x;
@@ -79,23 +80,32 @@ export class Point {
         this.graph = new Graphics(parent).rect(x, y, w, w).fill(`rgba(${color.r}, ${color.g}, ${color.b}, ${color?.a || 100}%)`);
     }
 
-    speedFrom(x: number, y: number) {
-        if (this.state === PointAction.NotActive) {
-            this.state = PointAction.Run
+    runFrom(x: number, y: number) {
+        // if (this.state === PointAction.NotAct) {
+        this.state = PointAction.Run
+        this.speed = this.maxSpeed;
+        this.velocityFrom(x, y);
 
-            this.velocity = {
-                x: x - this.x,
-                y: y - this.y
-            }
+        // }
+    }
 
-            const magn = -Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y)
-
-            this.velocity.x /= magn;
-            this.velocity.y /= magn;
+    velocityFrom(x: number, y: number) {
+        this.velocity = {
+            x: x - this.x,
+            y: y - this.y
         }
+
+        const magn = -Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y)
+
+        this.velocity.x /= magn;
+        this.velocity.y /= magn;
     }
 
     redraw() {
+        if (this.state === PointAction.Redraw) {
+            this.state = PointAction.NotActive
+            this.reset();
+        }
         this.graph
             .rect(this.x, this.y, this.size, this.size)
             .fill(`rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.color?.a || 100}%)`);
@@ -108,22 +118,22 @@ export class Point {
             if (this.state === PointAction.Run) {
                 this.x += this.velocity.x * this.speed;
                 this.y += this.velocity.y * this.speed;
-                this.speed -= 1
+                this.speed -= 0.1
 
                 if (this.speed < 0.1) {
-                    this.speed = 0;
+                    this.speed = this.maxSpeed;
                     this.state = PointAction.Return;
+                    this.velocityFrom(this.startX, this.startY);
                 }
             }
             else if (this.state === PointAction.Return) {
 
                 this.x -= this.velocity.x * this.speed;
                 this.y -= this.velocity.y * this.speed;
-                this.speed += .5;
                 const distX = this.x - this.startX;
                 const distY = this.y - this.startY;
                 if (distX * distX + distY * distY < 25 || (isNaN(this.x) || isNaN(this.y))) {
-                    this.reset();
+                    this.state = PointAction.Redraw
                 }
             }
         }
@@ -264,8 +274,8 @@ export class Grid {
             const cellPoints = cell.points;
 
             const rect: Rect = {
-                x: cellPoints[0].x,
-                y: cellPoints[0].y,
+                x: cellPoints[0].startX,
+                y: cellPoints[0].startY,
                 w: this.size
             }
 
@@ -276,23 +286,30 @@ export class Grid {
         }, [] as Point[])
 
         callback(points.filter((point) => {
-            const distX = circle.x - point.centerX;
-            const distY = circle.y - point.centerY;
+            const center = {
+                x: point.x + point.size / 2,
+                y: point.y + point.size / 2
+            }
+            const distX = circle.x - center.x;
+            const distY = circle.y - center.y;
             const distSquared = distX * distX + distY * distY;
-            return distSquared <= circle.r * circle.r && point.state === PointAction.NotActive
+            return distSquared <= circle.r * circle.r
         }))
     }
 
     movePoints() {
         this.grid.forEach((cell) => {
-            cell.grap.clear();
-            cell.points.forEach((point) => {
-                if (point.state === PointAction.NotActive) {
-                    point.redraw();
-                    return
-                }
-                point.move()
-            })
+            if (cell.points.some((point) => point.state !== PointAction.NotActive)) {
+
+                cell.grap.clear();
+                cell.points.forEach((point) => {
+                    if (point.state === PointAction.NotActive) {
+                        point.redraw();
+                        return
+                    }
+                    point.move()
+                })
+            }
         })
     }
 }
