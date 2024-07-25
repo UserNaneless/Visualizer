@@ -6,7 +6,7 @@ import useMeasure from 'react-use-measure'
 
 import "./Visualizer.sass"
 
-const pointSize = 5;
+const pointSize = 10;
 
 const Visualizer = () => {
 
