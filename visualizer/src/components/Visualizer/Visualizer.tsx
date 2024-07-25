@@ -9,7 +9,7 @@ import "./Visualizer.sass"
 import { Application } from "pixi.js";
 
 const pointSize = 10;
-const cellSize = 200;
+const cellSize = 100;
 const fps = 144;
 
 const app = new Application();
