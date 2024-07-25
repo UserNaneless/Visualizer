@@ -14,7 +14,7 @@ const Visualizer = () => {
     const canvas = useRef<HTMLCanvasElement | null>(null);
     const ctx = useRef<CanvasRenderingContext2D | null>(null);
 
-    const radius = useRef(10);
+    const radius = useRef(70);
 
     useEffect(() => {
         ctx.current = canvas.current?.getContext('2d') || null;
@@ -55,23 +55,42 @@ const Visualizer = () => {
         <canvas id="canvas" ref={(element) => {
             ref(element);
             canvas.current = element;
-        }} width={width} height={height} onMouseMove={(e) => {
-            if (!gridPoints) return
+        }} width={width} height={height}
 
-            gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (points) => {
-                points.forEach(point => {
-                    point.color = {
-                        r: 255,
-                        g: 0,
-                        b: 0,
-                        a: 50
-                    }
-                    point.speedFrom(e.clientX, e.clientY)
+            onClick={() => console.log(gridPoints)}
+
+            onTouchMove={e => {
+                if (!gridPoints) return
+                gridPoints.collisionCircle(e.touches[0].clientX, e.touches[0].clientY, radius.current, (points) => {
+                    points.forEach(point => {
+                        point.color = {
+                            r: 255,
+                            g: 0,
+                            b: 0,
+                            a: 50
+                        }
+                        point.speedFrom(e.touches[0].clientX, e.touches[0].clientY)
+                    })
                 })
-            })
-        }}
+            }}
+
+            onMouseMove={(e) => {
+                if (!gridPoints) return
+
+                gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (points) => {
+                    points.forEach(point => {
+                        point.color = {
+                            r: 255,
+                            g: 0,
+                            b: 0,
+                            a: 50
+                        }
+                        point.speedFrom(e.clientX, e.clientY)
+                    })
+                })
+            }}
             onWheel={(e) => {
-                // radius.current += e.deltaY / 120
+                radius.current += e.deltaY / 120
             }}
         >
 

@@ -39,9 +39,19 @@ const circleRectCollision = (r: Rect, c: Circle) => {
     return distSquared <= c.r * c.r
 }
 
+enum PointAction {
+    NotActive,
+    Run,
+    Return
+}
+
 export class Point {
     x: number;
     y: number;
+    centerX: number;
+    centerY: number
+    startX: number;
+    startY: number;
     size: number;
     color: Color;
     velocity: Velocity = {
@@ -49,16 +59,23 @@ export class Point {
         y: 0
     }
     speed = 10
-    active = false
+    maxSpeed = 10
+    state = PointAction.NotActive
     constructor(x: number, y: number, w: number, color: Color) {
         this.x = x;
+        this.startX = x;
         this.y = y;
+        this.startY = y;
         this.size = w;
         this.color = color;
+        this.centerX = x + w / 2;
+        this.centerY = y + w / 2;
     }
 
     speedFrom(x: number, y: number) {
-        if (!this.active) {
+        if (this.state === PointAction.NotActive) {
+            this.state = PointAction.Run
+
             this.velocity = {
                 x: x - this.x,
                 y: y - this.y
@@ -68,14 +85,45 @@ export class Point {
 
             this.velocity.x /= magn;
             this.velocity.y /= magn;
-
-            this.active = true;
         }
     }
 
     move() {
-        this.x += this.velocity.x * this.speed;
-        this.y += this.velocity.y * this.speed;
+        if (this.state !== PointAction.NotActive) {
+            if (this.state === PointAction.Run) {
+                this.x += this.velocity.x * this.speed;
+                this.y += this.velocity.y * this.speed;
+                this.speed -= 1
+
+                if (this.speed < 0.1) {
+                    this.speed = 0;
+                    this.state = PointAction.Return;
+                }
+            }
+            else if (this.state === PointAction.Return) {
+
+                this.x -= this.velocity.x * this.speed;
+                this.y -= this.velocity.y * this.speed;
+                this.speed += .5;
+                const distX = this.x - this.startX;
+                const distY = this.y - this.startY;
+                if (distX * distX + distY * distY < 25 || (isNaN(this.x) || isNaN(this.y))) {
+                    this.reset();
+                }
+            }
+        }
+    }
+
+    reset() {
+        this.state = PointAction.NotActive
+        this.x = this.startX;
+        this.y = this.startY;
+        this.speed = this.maxSpeed;
+        this.velocity = {
+            x: 0,
+            y: 0
+        }
+
     }
 }
 
@@ -172,14 +220,13 @@ export class Grid {
             }
             return points
         }, [])
-        // .filter(point => {
-        //     const distX = point.x - circle.x;
-        //     const distY = point.y - circle.y;
-        //     return distX * distX + distY * distY <= circle.r * circle.r
-        // })
 
-
-        callback(points);
+        callback(points.filter((point) => {
+            const distX = circle.x - point.centerX;
+            const distY = circle.y - point.centerY;
+            const distSquared = distX * distX + distY * distY;
+            return distSquared <= circle.r * circle.r
+        }))
     }
 }
 
