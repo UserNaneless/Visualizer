@@ -6,6 +6,8 @@ import useMeasure from 'react-use-measure'
 
 import "./Visualizer.sass"
 
+const pointSize = 5;
+
 const Visualizer = () => {
 
     const [gridPoints, setGridPoints] = useState<Grid | null>(null);
@@ -30,7 +32,7 @@ const Visualizer = () => {
 
         setGridPoints(() => {
             const grid = new Grid(width, height, 100)
-            grid.fillGrid(createPoints(width, height, 10));
+            grid.fillGrid(createPoints(width, height, pointSize));
             grid.startDrawing(ctx.current!);
             return grid
         });
