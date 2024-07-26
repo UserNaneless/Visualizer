@@ -64,8 +64,8 @@ export class Point {
         x: 0,
         y: 0
     }
-    speed = 4
-    maxSpeed = 4
+    speed = 6
+    maxSpeed = 6
     state = PointAction.NotActive
     constructor(x: number, y: number, w: number, color: Color, parent: GraphicsContext) {
         this.x = x;
@@ -80,26 +80,32 @@ export class Point {
         this.graph = new Graphics(parent).rect(x, y, w, w).fill(`rgba(${color.r}, ${color.g}, ${color.b}, ${color?.a || 100}%)`);
     }
 
+    velocityFrom(x: number, y: number, scale?: number) {
+        this.velocity = {
+            x: this.x - x,
+            y: this.y - y
+        }
+
+        const magn = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y)
+
+        // this.velocity.x /= magn;
+        // this.velocity.y /= magn;
+
+        if (scale) {
+            this.velocity.x *= scale;
+            this.velocity.y *= scale;
+        }
+    }
+
     runFrom(x: number, y: number) {
         // if (this.state === PointAction.NotAct) {
         this.state = PointAction.Run
         this.speed = this.maxSpeed;
-        this.velocityFrom(x, y);
+        this.velocityFrom(x, y, .1);
 
         // }
     }
 
-    velocityFrom(x: number, y: number) {
-        this.velocity = {
-            x: x - this.x,
-            y: y - this.y
-        }
-
-        const magn = -Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y)
-
-        this.velocity.x /= magn;
-        this.velocity.y /= magn;
-    }
 
     redraw() {
         if (this.state === PointAction.Redraw) {
@@ -116,22 +122,31 @@ export class Point {
 
         if (this.state !== PointAction.NotActive) {
             if (this.state === PointAction.Run) {
-                this.x += this.velocity.x * this.speed;
-                this.y += this.velocity.y * this.speed;
-                this.speed -= 0.1
+                this.x += this.velocity.x
+                this.y += this.velocity.y
 
-                if (this.speed < 0.1) {
+                this.velocity.x *= .95
+                this.velocity.y *= .95
+
+
+                if (Math.abs(this.velocity.x) < 0.5 || Math.abs(this.velocity.y) < 0.5) {
                     this.speed = this.maxSpeed;
                     this.state = PointAction.Return;
-                    this.velocityFrom(this.startX, this.startY);
+                    this.velocityFrom(this.startX, this.startY, .15);
                 }
             }
             else if (this.state === PointAction.Return) {
 
-                this.x -= this.velocity.x * this.speed;
-                this.y -= this.velocity.y * this.speed;
+                this.x -= this.velocity.x
+                this.y -= this.velocity.y
+
+
                 const distX = this.x - this.startX;
                 const distY = this.y - this.startY;
+
+                this.velocity.x *= .95
+                this.velocity.y *= .95
+
                 if (distX * distX + distY * distY < 25 || (isNaN(this.x) || isNaN(this.y))) {
                     this.state = PointAction.Redraw
                 }
@@ -262,7 +277,7 @@ export class Grid {
         }))
     }
 
-    collisionCircle(x: number, y: number, r: number, callback: (points: Point[]) => void) {
+    collisionCircle(x: number, y: number, r: number, callback: (point: Point) => void) {
         const circle: Circle = {
             x,
             y,
@@ -285,7 +300,7 @@ export class Grid {
             return points
         }, [] as Point[])
 
-        callback(points.filter((point) => {
+        points.forEach((point) => {
             const center = {
                 x: point.x + point.size / 2,
                 y: point.y + point.size / 2
@@ -293,14 +308,15 @@ export class Grid {
             const distX = circle.x - center.x;
             const distY = circle.y - center.y;
             const distSquared = distX * distX + distY * distY;
-            return distSquared <= circle.r * circle.r
-        }))
+            if (distSquared <= circle.r * circle.r) {
+                callback(point)
+            }
+        })
     }
 
     movePoints() {
         this.grid.forEach((cell) => {
             if (cell.points.some((point) => point.state !== PointAction.NotActive)) {
-
                 cell.grap.clear();
                 cell.points.forEach((point) => {
                     if (point.state === PointAction.NotActive) {

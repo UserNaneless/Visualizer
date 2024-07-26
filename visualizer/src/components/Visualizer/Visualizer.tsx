@@ -97,11 +97,9 @@ const Visualizer = () => {
 
     const throttledMove = useMemo(() => throttle((e) => {
         if (!gridPoints) return
-        gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (points) => {
+        gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (point) => {
             // gridPoints.collisionAll(e.clientX, e.clientY, radius.current, (points) => {
-            points.forEach(point => {
-                point.runFrom(e.clientX, e.clientY)
-            })
+            point.runFrom(e.clientX, e.clientY)
         })
     }, 1000 / fps), [gridPoints])
 
@@ -116,21 +114,25 @@ const Visualizer = () => {
 
                 onTouchMove={e => {
                     if (!gridPoints) return
-                    gridPoints.collisionCircle(e.touches[0].clientX, e.touches[0].clientY, radius.current, (points) => {
-                        points.forEach(point => {
-                            point.color = {
-                                r: 255,
-                                g: 0,
-                                b: 0,
-                                a: 50
-                            }
-                            point.runFrom(e.touches[0].clientX, e.touches[0].clientY)
-                        })
+                    gridPoints.collisionCircle(e.touches[0].clientX, e.touches[0].clientY, radius.current, (point) => {
+                        point.color = {
+                            r: 255,
+                            g: 0,
+                            b: 0,
+                            a: 50
+                        }
+                        point.runFrom(e.touches[0].clientX, e.touches[0].clientY)
                     })
                 }}
 
                 onMouseMove={(e) => {
-                    throttledMove(e)
+                    // throttledMove(e)
+
+                    if (!gridPoints) return
+                    gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (point) => {
+                        // gridPoints.collisionAll(e.clientX, e.clientY, radius.current, (points) => {
+                        point.runFrom(e.clientX, e.clientY)
+                    })
                 }}
                 onWheel={(e) => {
                     radius.current += e.deltaY / 120
