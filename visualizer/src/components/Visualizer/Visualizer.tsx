@@ -9,7 +9,7 @@ import "./Visualizer.sass"
 import { Application } from "pixi.js";
 
 const pointSize = 10;
-const cellSize = 100;
+const cellSize = 200;
 const fps = 144;
 
 const app = new Application();
@@ -25,25 +25,28 @@ const Visualizer = () => {
     const canvas = useRef<HTMLCanvasElement | null>(null);
     const ctx = useRef<CanvasRenderingContext2D | null>(null);
     const [loaded, setLoaded] = useState(false);
+    const mousePosRef = useRef({
+        x: 0,
+        y: 0
+    })
 
-    const radius = useRef(70);
+    const radius = useRef(60);
 
     useEffect(() => {
-        // ctx.current = canvas.current?.getContext('2d') || null;
-        //
+        if (canvas.current) {
 
-        if (canvas.current)
             app.init({
                 canvas: canvas.current,
                 width,
                 height
             }).then(() => {
-                console.log(app)
+                app.ticker.maxFPS = 144
                 setLoaded(true);
                 app.renderer.background.color = 0xffffff
             }).catch((err) => {
             });
 
+        }
 
         return () => {
             ctx.current = null;
@@ -55,44 +58,23 @@ const Visualizer = () => {
         setGridPoints(() => {
             const grid = new Grid(width, height, cellSize).fillGrid(width, height, pointSize).startDrawing(app.stage)
 
-            app.ticker.add(() => {
-                grid.movePoints();
+            const runFrom = () => {
+                const { x, y } = mousePosRef.current;
+                grid.collisionCircle(x, y, radius.current, (point) => {
+                    // gridPoints.collisionAll(e.clientX, e.clientY, radius.current, (points) => {
+                    point.runFrom(x, y)
+                })
+            }
+
+            app.ticker.add(({ deltaTime }) => {
+                runFrom();
+                grid.movePoints(deltaTime);
             })
 
             return grid;
         });
 
     }, [loaded])
-
-    // useEffect(() => {
-    //     if (ctx.current) {
-    //
-    //         const width = canvas.current?.clientWidth || 0;
-    //         const height = canvas.current?.clientHeight || 0;
-    //
-    //         setGridPoints(() => {
-    //             const grid = new Grid(width, height, 100)
-    //             grid.fillGrid(createPoints(width, height, pointSize));
-    //             grid.startDrawing(ctx.current!);
-    //             return grid
-    //         });
-    //
-    //     }
-    //
-    //     return () => {
-    //         setGridPoints(null);
-    //     }
-    //
-    //
-    // }, [ctx.current])
-
-    // useEffect(() => {
-    // if (!gridPoints) return
-    // ctx.current?.clearRect(0, 0, width, height);
-    // gridPoints.drawGrid(ctx.current!);
-    // gridPoints.drawGridBorders(ctx.current!);
-    // }, [gridPoints])
-    //
 
 
     const throttledMove = useMemo(() => throttle((e) => {
@@ -127,12 +109,10 @@ const Visualizer = () => {
 
                 onMouseMove={(e) => {
                     // throttledMove(e)
-
-                    if (!gridPoints) return
-                    gridPoints.collisionCircle(e.clientX, e.clientY, radius.current, (point) => {
-                        // gridPoints.collisionAll(e.clientX, e.clientY, radius.current, (points) => {
-                        point.runFrom(e.clientX, e.clientY)
-                    })
+                    mousePosRef.current = {
+                        x: e.clientX,
+                        y: e.clientY
+                    }
                 }}
                 onWheel={(e) => {
                     radius.current += e.deltaY / 120

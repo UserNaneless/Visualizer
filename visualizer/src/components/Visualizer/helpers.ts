@@ -57,8 +57,7 @@ export class Point {
     centerX: number;
     centerY: number
     startX: number;
-    startY: number;
-    size: number;
+    startY: number; size: number;
     color: Color;
     velocity: Velocity = {
         x: 0,
@@ -77,7 +76,7 @@ export class Point {
         this.centerX = x + w / 2;
         this.centerY = y + w / 2;
 
-        this.graph = new Graphics(parent).rect(x, y, w, w).fill(`rgba(${color.r}, ${color.g}, ${color.b}, ${color?.a || 100}%)`);
+        this.graph = new Graphics(parent).rect(x, y, w, w)
     }
 
     velocityFrom(x: number, y: number, scale?: number) {
@@ -114,42 +113,17 @@ export class Point {
         }
         this.graph
             .rect(this.x, this.y, this.size, this.size)
-            .fill(`rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.color?.a || 100}%)`);
     }
 
-    move() {
-        this.redraw();
-
+    move(delta: number) {
         if (this.state !== PointAction.NotActive) {
             if (this.state === PointAction.Run) {
-                this.x += this.velocity.x
-                this.y += this.velocity.y
-
-                this.velocity.x *= .95
-                this.velocity.y *= .95
-
-
-                if (Math.abs(this.velocity.x) < 0.5 || Math.abs(this.velocity.y) < 0.5) {
-                    this.speed = this.maxSpeed;
-                    this.state = PointAction.Return;
-                    this.velocityFrom(this.startX, this.startY, .15);
+                this.color = {
+                    r: 0,
+                    g: 255,
+                    b: 0
                 }
-            }
-            else if (this.state === PointAction.Return) {
 
-                this.x -= this.velocity.x
-                this.y -= this.velocity.y
-
-
-                const distX = this.x - this.startX;
-                const distY = this.y - this.startY;
-
-                this.velocity.x *= .95
-                this.velocity.y *= .95
-
-                if (distX * distX + distY * distY < 25 || (isNaN(this.x) || isNaN(this.y))) {
-                    this.state = PointAction.Redraw
-                }
             }
         }
     }
@@ -284,9 +258,14 @@ export class Grid {
             r
         }
 
-        const points = this.grid.reduce((points, cell) => {
+        let iG = this.grid.length;
+        let iP = this.grid[0].points.length;
 
+        while (iG--) {
+            const cell = this.grid[iG]
             const cellPoints = cell.points;
+            iP = cellPoints.length;
+
 
             const rect: Rect = {
                 x: cellPoints[0].startX,
@@ -295,38 +274,69 @@ export class Grid {
             }
 
             if (circleRectCollision(rect, circle)) {
-                points.push(...cellPoints)
+                while (iP--) {
+                    const point = cellPoints[iP];
+                    const center = {
+                        x: point.x + point.size / 2,
+                        y: point.y + point.size / 2
+                    }
+                    const distX = circle.x - center.x;
+                    const distY = circle.y - center.y;
+                    const distSquared = distX * distX + distY * distY;
+                    if (distSquared <= circle.r * circle.r) {
+                        callback(point)
+                    }
+                }
+
             }
+
+        }
+
+        const points = this.grid.reduce((points, cell) => {
+
             return points
         }, [] as Point[])
 
         points.forEach((point) => {
-            const center = {
-                x: point.x + point.size / 2,
-                y: point.y + point.size / 2
-            }
-            const distX = circle.x - center.x;
-            const distY = circle.y - center.y;
-            const distSquared = distX * distX + distY * distY;
-            if (distSquared <= circle.r * circle.r) {
-                callback(point)
-            }
         })
     }
 
-    movePoints() {
-        this.grid.forEach((cell) => {
+    movePoints(delta: number) {
+
+        let iG = this.grid.length;
+        let iP = this.grid[0].points.length;
+        let redraw = false;
+
+        while (iG--) {
+            const cell = this.grid[iG];
+            cell.grap.clear();
             if (cell.points.some((point) => point.state !== PointAction.NotActive)) {
-                cell.grap.clear();
-                cell.points.forEach((point) => {
+                let iP = cell.points.length;
+                while (iP--) {
+                    const point = cell.points[iP];
                     if (point.state === PointAction.NotActive) {
                         point.redraw();
-                        return
+                        continue
                     }
-                    point.move()
-                })
+                    point.move(delta);
+                }
+
+
+                // cell.points.forEach((point) => {
+                //     if (point.state === PointAction.NotActive) {
+                //         point.redraw();
+                //         return
+                //     }
+                //     point.move(delta)
+                // })
+
+
             }
-        })
+
+
+            cell.grap.fill(`rgba(${cell.points[0].color.r}, ${cell.points[0].color.g}, ${cell.points[0].color.b}, ${cell.points[0].color?.a || 100}%)`);
+
+        }
     }
 }
 
@@ -356,15 +366,3 @@ const getWhiteColor = () => {
 //     }
 //     return points
 // }
-
-const drawAndMovePoints = (points: Point[], ctx: CanvasRenderingContext2D) => {
-    for (const point of points) {
-        ctx.fillStyle = `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, ${point.color?.a || 100}%)`;
-        ctx.fillRect(point.x, point.y, point.size, point.size);
-        point.move();
-    }
-}
-
-export {
-    drawAndMovePoints
-}
