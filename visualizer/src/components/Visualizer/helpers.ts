@@ -321,6 +321,7 @@ export class Grid {
                     point.move(delta);
                 }
 
+                cell.grap.fill(`rgba(${cell.points[0].color.r}, ${cell.points[0].color.g}, ${cell.points[0].color.b}, ${cell.points[0].color?.a || 100}%)`);
 
                 // cell.points.forEach((point) => {
                 //     if (point.state === PointAction.NotActive) {
@@ -333,8 +334,6 @@ export class Grid {
 
             }
 
-
-            cell.grap.fill(`rgba(${cell.points[0].color.r}, ${cell.points[0].color.g}, ${cell.points[0].color.b}, ${cell.points[0].color?.a || 100}%)`);
 
         }
     }
