@@ -289,8 +289,13 @@ export class WebGL {
 
     onMouseMove(e: React.MouseEvent) {
         if (this.gl) {
-            // this.gl.uniform1f(this.uPointSize, 200);
             this.gl.uniform2f(this.uMousePos, e.clientX, e.clientY);
+        }
+    }
+
+    onTouchMove(e: React.TouchEvent) {
+        if (this.gl && e.touches[0]) {
+            this.gl.uniform2f(this.uMousePos, e.touches[0].clientX, e.touches[0].clientY);
         }
     }
 
