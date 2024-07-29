@@ -2,7 +2,6 @@
 
 import useMeasure from "react-use-measure";
 import "./WebglVisualizer.sass"
-import { useEffect, useRef } from "react";
 import { WebGL } from "./webglHelpers";
 
 const webgl = new WebGL();
@@ -14,7 +13,7 @@ const WebglVisualizer = () => {
     return <div className="wrapper" ref={ref} onClick={() => {
         console.log(webgl)
         webgl.onClick();
-    }} onMouseMove={e => webgl.onMouseMove(e)}>
+    }} onMouseMove={e => webgl.onMouseMove(e)} onTouchMove={e => webgl.onTouchMove(e)}>
         <canvas ref={el => {
             if (el) {
                 const gl = el.getContext('webgl2')
