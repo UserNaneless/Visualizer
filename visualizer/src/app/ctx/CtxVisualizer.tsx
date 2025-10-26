@@ -1,81 +1,208 @@
 'use client'
 
-
 import { useEffect, useRef, useState } from "react";
 import "./CtxVisualizer.sass"
-import useMeasure from "react-use-measure";
-import { Animator, ctxGrid } from "./ctxHelpers";
 
-const animator = new Animator();
-const gridRendering = (grid: ctxGrid, deltaTime: number) => {
-    if (grid.mousePos.current) {
-        const mousePos = grid.mousePos.current;
-        let index = grid.coordsToIndex(mousePos.x, mousePos.y)
-        const points = grid.points[index]
-        index = points.length;
-        while (index--) {
-            const point = points[index];
-            const dist = (point.x - mousePos.x) ** 2 + (point.y - mousePos.y) ** 2
-            if (dist < 2500)
-                point.runFrom(mousePos.x, mousePos.y)
-        }
-    }
-    grid.drawGrid(deltaTime);
+type Color = {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
 }
 
-const pointSize = 10
-const cellSize = pointSize * 20
+const GRID_X = 10;
+const GRID_Y = 10;
 
-let timer: NodeJS.Timeout;
+type Grid = Particle[][];
 
+class Particle {
+    x: number;
+    y: number;
+    vx: number = 0;
+    vy: number = 0;
+    startX: number;
+    startY: number;
+    size: number;
+    color: Color = {
+        r: 0,
+        g: 0,
+        b: 124,
+        a: .3
+    };
+    state: number = 0;
+    constructor(x: number, y: number, size: number) {
+        this.x = x;
+        this.y = y;
+        this.startX = x;
+        this.startY = y;
+        this.size = size;
+
+        return this;
+    }
+
+    setColor(color: Color) {
+        this.color = color;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+
+        this.move();
+
+        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.color.a})`;
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+
+    }
+
+    trigger(x: number, y: number) {
+        this.state = 1;
+        this.vx = (this.x - x) / 10;
+        this.vy = (this.y - y) / 10;
+    }
+
+    move() {
+        switch(this.state) {
+            case 1: {
+                if(Math.abs(this.vx) < .1 && Math.abs(this.vy) < .1) {
+                    this.state = 2;
+                    this.vx = (this.startX - this.x) / 10;
+                    this.vy = (this.startY - this.y) / 10;
+                }
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= .95
+                this.vy *= .95
+                break;
+            }
+            case 2: {
+                if(Math.abs(this.x + this.vx - this.startX) < .1 && Math.abs(this.y + this.vy - this.startY) < .1) {
+                    this.state = 0;
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.x = this.startX;
+                    this.y = this.startY;
+                }
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx = (this.startX - this.x) / 10;
+                this.vy = (this.startY - this.y) / 10;
+                break;
+            }
+        }
+    }
+
+}
+
+const drawParticles = (particles: Particle[], ctx: CanvasRenderingContext2D) => {
+    for (let i = 0; i < particles.length; i++) {
+        particles[i].draw(ctx);
+    }
+}
+
+const createParticles = (w: number, h: number, size: number) => {
+
+    const particles: Particle[] = []
+
+    for (let x = 0; x < w; x += size) {
+        for (let y = 0; y < h; y += size) {
+            particles.push(new Particle(x, y, size))
+        }
+    }
+
+    return particles;
+
+}
+
+const createGrid = (w: number, h: number, size: number) => {
+    const grid: Grid = [];
+    for (let gx = 0; gx < w; gx += GRID_X * size) {
+        for (let gy = 0; gy < h; gy += GRID_Y * size) {
+            grid.push([])
+
+            for (let x = 0; x < GRID_X; x++) {
+                for (let y = 0; y < GRID_Y; y++) {
+                    if (gx + x * size >= w || gy + y * size >= h) continue
+                    grid[grid.length - 1].push(new Particle(gx + x * size, gy + y * size, size))
+                }
+            }
+
+        }
+    }
+
+    return grid;
+}
+
+const drawGrid = (grid: Grid, ctx: CanvasRenderingContext2D) => {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    for (let i = 0; i < grid.length; i++) {
+        drawParticles(grid[i], ctx);
+    }
+}
+
+const traverseGrid = (grid: Grid, func: (particle: Particle) => void) => {
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+            func(grid[i][j]);
+        }
+    }
+}
 
 const CtxVisualizer = () => {
 
-    const [ref, { width, height }] = useMeasure();
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-    const backCtxRef = useRef<CanvasRenderingContext2D | null>(null);
-    const grid = useRef<ctxGrid | null>(null);
-    const mousePos = useRef<{
-        x: number, y: number
-    } | null>(null);
 
-    const [dpr] = useState(1);
+    const [size, setSize] = useState({
+        width: 0,
+        height: 0
+    })
 
+    const grid = useRef<Grid>([]);
 
     useEffect(() => {
-        if (ctxRef.current && backCtxRef.current && width != 0) {
-            grid.current = new ctxGrid(backCtxRef.current, width, height, cellSize, mousePos)
-                .fillGrid(pointSize)
+        let frame: number;
 
-            animator.setBuffers(backCtxRef.current, ctxRef.current).add((deltaTime: number) => gridRendering(grid.current!, deltaTime)).startRendering();
+        const render = () => {
+            frame = requestAnimationFrame(render);
+            ctxRef.current && drawGrid(grid.current, ctxRef.current);
         }
+
+        setSize({
+            width: window.innerWidth,
+            height: window.innerHeight
+        })
+
+        render();
 
         return () => {
-            animator.clear()
+            cancelAnimationFrame(frame);
         }
-    }, [ctxRef.current, backCtxRef.current])
+    }, [])
 
+    return (
+        <div className="wrapper">
+            <canvas width={size.width} height={size.height} ref={item => {
+                if (item) {
+                    ctxRef.current = item.getContext("2d");
+                    grid.current = createGrid(item.width, item.height, 10);
 
-    return <div className="wrapper" ref={ref} onClick={() => {
-        console.log(grid.current)
-    }} onMouseMove={(e) => {
-        mousePos.current = { x: e.clientX, y: e.clientY }
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            mousePos.current = null
-        }, 40)
-    }} onTouchMove={e => {
-        mousePos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    }}>
-        <canvas ref={el => {
-            ctxRef.current = el?.getContext('2d') || null
-        }} width={width * dpr} height={height * dpr} />
+                    window.grid = grid.current;
+                }
+            }}
 
-        <canvas className="backbuffer" ref={el => {
-            backCtxRef.current = el?.getContext('2d') || null
-        }} width={width * dpr} height={height * dpr} />
+                onMouseMove={e => {
+                    if (ctxRef.current) {
+                        traverseGrid(grid.current, particle => {
+                            const x = particle.x - e.clientX;
+                            const y = particle.y - e.clientY;
+                            const r = 50;
+                            if (x * x + y * y < r * r)
+                                particle.trigger(e.clientX, e.clientY);
+                        })
+                    }
+                }}
 
-    </div>
+            ></canvas>
+        </div>
+    )
 }
 
 export default CtxVisualizer;

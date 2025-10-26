@@ -49,9 +49,9 @@ export class WebGL {
         
         float distToStart = distance(aPosition, aStartPosition);
         if(distToStart > 500.0) {
-            vVelocity = vec2(0.0, 0.0);
-            nextPosition = aStartPosition;
+            vVelocity = normalize(aStartPosition - aPosition);
         }
+
 
         gl_Position = vec4(toScreen(aPosition + vVelocity), 0.0, 1.0);
         gl_PointSize = uPointSize;
@@ -72,10 +72,10 @@ export class WebGL {
 
     void main() {
         if(dist < 100.0) {
-            fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+            fragColor = vec4(0.0, 1.0, 0.0, 0.5);
         }
         else {
-            fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            fragColor = vec4(1.0, 0.0, 0.0, 0.5);
         }
     }
 
@@ -87,7 +87,7 @@ export class WebGL {
 
     count = 0
 
-    defaultPointSize = 1;
+    defaultPointSize = 10;
 
     report = false;
 
@@ -218,6 +218,8 @@ export class WebGL {
                 this.gl.useProgram(prog);
                 this.prog = prog;
                 this.gl.clearColor(1, 1, 1, 1)
+                this.gl.enable(this.gl.BLEND);
+                this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
                 // this.gl.enable(this.gl.DEPTH_TEST)
 
 
