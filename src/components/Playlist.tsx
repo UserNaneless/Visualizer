@@ -3,8 +3,7 @@ import React, { useState, useRef } from 'react'
 
 import styles from "../styles/playlist.module.css"
 import Song from './Song';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowsRotate, faShuffle, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FaArrowsRotate, FaShuffle, FaTrash, FaXmark } from 'react-icons/fa6';
 
 
 export default function Playlist({ playlist, songOnClick, playlistShuffle, setPlaylist, setLooped, looped, playlistOpened }) {
@@ -82,13 +81,13 @@ export default function Playlist({ playlist, songOnClick, playlistShuffle, setPl
         e.currentTarget.style.background = "white";
         e.currentTarget.style.color = "#767676";
         e.currentTarget.style.transform = "scale(1)";
-        if(e.currentTarget == currentItemDOM){
+        if (e.currentTarget == currentItemDOM) {
             currentItemDOM.style.transform = "scale(.9)";
         }
     }
 
     return (
-        <div className={`${styles.playlistMain} ${playlistOpened  ? styles.playlistOpen : ""}`} >
+        <div className={`${styles.playlistMain} ${playlistOpened ? styles.playlistOpen : ""}`} >
             <div className={styles.playlistTop}>
                 <div className={styles.searchWrapper}>
                     <input ref={input} className={styles.searchBar} type="text" placeholder="Search song "
@@ -97,12 +96,12 @@ export default function Playlist({ playlist, songOnClick, playlistShuffle, setPl
                         input.current.value = "";
                         setSearch("");
                     }}>
-                        <FontAwesomeIcon icon={faXmark} />
+                        <FaXmark />
                     </button>
                 </div>
 
                 <button className={`${styles.playlistButton}`} onClick={requestShuffle}>
-                    <FontAwesomeIcon icon={faShuffle} />
+                    <FaShuffle />
                 </button>
 
                 <button className={`${styles.playlistButton}`} onClick={requestPlaylistLoop}
@@ -111,11 +110,11 @@ export default function Playlist({ playlist, songOnClick, playlistShuffle, setPl
                         color: looped ? "white" : "#767676"
                     }}
                 >
-                    <FontAwesomeIcon icon={faArrowsRotate} />
+                    <FaArrowsRotate />
                 </button>
 
                 <button className={`${styles.playlistButton}`} onClick={requestPlaylistClear}>
-                    <FontAwesomeIcon icon={faTrashCan} />
+                    <FaTrash />
                 </button>
             </div>
 
