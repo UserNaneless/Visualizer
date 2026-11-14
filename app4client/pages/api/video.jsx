@@ -1,38 +1,51 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
-import ytdl from "ytdl-core"
-
+import { Ytdl, Quality, chooseFormat, parseVideoId } from "@distube/ytdl-core";
 import Throttle from "throttle";
 
-export default async function  handler(req, res) {
-    let videoLink = req.query.link;
+// Create ONCE and reuse; the instance holds the YouTube session
+const yt = new Ytdl();
 
-    let info = null;
+export default async function handler(req, res) {
+    const videoLink = req.query.link;
+    const videoId = videoLink ? parseVideoId(videoLink) : undefined;
 
-    if ((ytdl.validateURL(videoLink) || ytdl.validateID(videoLink)) && videoLink) {
-        info = await ytdl.getInfo(ytdl.getVideoID(videoLink));
-
-        let audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
-        if (audioFormats.length > 0) {
-            res.writeHead(200, { "Content-type": "video/webm" })
-
-            const format = ytdl.chooseFormat(audioFormats, {
-                quality: "highestaudio",
-            });
-
-            const audioBitrate = format.bitrate;
-            const audioCodec = format.audioCodec;
-
-            const throttle = new Throttle(format.bitrate);
-
-
-            ytdl.downloadFromInfo(info, {
-                filter: "audioonly",
-                quality: "highestaudio"
-            }).pipe(throttle).pipe(res);
-        }
-
+    if (!videoId) {
+        return res.status(400).json({ error: "Invalid YouTube link or ID" });
     }
 
-    return new Response(res);
+    try {
+        const info = await yt.getInfo(videoId);
+
+        const audioFormats = info.formats.filter(
+            (f) => f.hasAudio && !f.hasVideo
+        );
+        if (audioFormats.length === 0) {
+            return res.status(404).json({ error: "No audio formats found" });
+        }
+
+        const format = chooseFormat(audioFormats, {
+            quality: Quality.HighestAudio,
+        });
+
+        res.writeHead(200, { "Content-Type": "video/webm" });
+
+        // bitrate is bits/sec, Throttle expects bytes/sec
+        const throttle = new Throttle(Math.ceil(format.bitrate / 8));
+
+        const stream = yt.download(info, { format });
+
+        stream.on("error", (err) => {
+            console.error(err);
+            res.destroy(err);
+        });
+        res.on("close", () => stream.destroy()); // stop downloading if client leaves
+
+        stream.pipe(throttle).pipe(res);
+    } catch (err) {
+        console.error(err);
+        if (!res.headersSent) {
+            res.status(500).json({ error: "Failed to fetch audio" });
+        } else {
+            res.end();
+        }
+    }
 }

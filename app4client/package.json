@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^5.2.1",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@prisma/client": "^5.0.0",
@@ -20,7 +21,6 @@
     "react-draggable": "^4.4.5",
     "three": "^0.154.0",
     "throttle": "^1.0.3",
-    "ytdl-core": "^4.11.5",
     "ytpl": "^2.3.0"
   },
   "devDependencies": {
