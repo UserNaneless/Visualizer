@@ -1,7 +1,8 @@
+//@ts-nocheck
 import React, { useState, useRef } from 'react'
 
 import styles from "../styles/playlist.module.css"
-import Song from './song';
+import Song from './Song';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowsRotate, faShuffle, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
 

@@ -1,7 +1,8 @@
+//@ts-nocheck
 import { useEffect, useRef, useState } from "react"
 
 import styles from "../styles/index.module.css"
-import Player from "@/components/player";
+import Player from "@/components/Player";
 
 
 var particleSize = 10;

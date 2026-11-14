@@ -1,0 +1,47 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [
+    ".astro/types.d.ts",
+    "**/*",
+    "./worker-configuration.d.ts"
+  ],
+  "exclude": [
+    "dist"
+  ],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "paths": {
+      "variables": [
+        "variables.sass"
+      ],
+      "actions": [
+        "src/actions"
+      ],
+      "@/*": [
+        "src/*"
+      ],
+      "hooks/*": [
+        "src/hooks/*"
+      ],
+      "layouts/*": [
+        "src/layouts/*"
+      ],
+      "Tuberlock/*": [
+        "src/components/Tuberlock/*"
+      ],
+      "TuberlockImages/*": [
+        "images/High/*"
+      ],
+      "Main/*": [
+        "src/components/Main/*"
+      ],
+      "Patients/*": [
+        "src/components/Patients/*"
+      ],
+      "helpers/*": [
+        "src/helpers/*"
+      ]
+    }
+  }
+}

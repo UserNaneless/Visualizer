@@ -1,11 +1,11 @@
+//@ts-nocheck
 import React, { useEffect, useRef, useState } from 'react'
 import styles from "../styles/player.module.css"
 import { config } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { faPlus, faPause, faPlay, faCircleNotch, faForwardStep, faBackwardStep, faList } from '@fortawesome/free-solid-svg-icons';
-import Playlist from './playlist';
-import { useRouter } from 'next/router';
+import Playlist from './Playlist';
 
 config.autoAddCss = false
 
@@ -39,7 +39,7 @@ export default function Player(props) {
     const audioSettings = useRef();
     const audioTitle = useRef();
     const [playlistSetuped, setPlaylistSetuped] = useState(false)
-    const [playerCanBeOpened, setPlayerOpen] = useState(false);
+    const [playerCanBeOpened, setPlayerOpen] = useState(true);
     const [loaded, setLoaded] = useState(true);
     const [audioBuffer, setAudioBuffer] = useState([video, video1]); // [0] - active, [1] - buffer
     const [playlist, setPlaylist] = useState([]);
@@ -196,8 +196,8 @@ export default function Player(props) {
 
     useEffect(() => {
         props.setVideo(audioBuffer);
-        setServer(window.location.href + "/api");
-        console.log(window.location.href + "/api");
+        setServer(window.location.href + "api");
+        console.log(window.location.href + "api");
         scrollTitle();
     }, [])
 
