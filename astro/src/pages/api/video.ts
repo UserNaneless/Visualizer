@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
 import { Readable } from "node:stream";
 import { Ytdl, Quality, chooseFormat, parseVideoId } from "@distube/ytdl-core";
-import Throttle from "throttle";
 
 export const prerender = false;
 
@@ -13,6 +12,18 @@ const json = (body: unknown, status: number) =>
     status,
     headers: { "Content-Type": "application/json" },
   });
+
+// Paces chunks so the average rate stays near bytesPerSec
+function throttleStream(bytesPerSec: number) {
+  return new TransformStream<Uint8Array, Uint8Array>({
+    async transform(chunk, controller) {
+      controller.enqueue(chunk);
+      await new Promise((r) =>
+        setTimeout(r, (chunk.length / bytesPerSec) * 1000)
+      );
+    },
+  });
+}
 
 export const GET: APIRoute = async ({ url, request }) => {
   const videoLink = url.searchParams.get("link");
@@ -34,27 +45,21 @@ export const GET: APIRoute = async ({ url, request }) => {
       quality: Quality.HighestAudio,
     });
 
-    // bitrate is bits/sec, Throttle expects bytes/sec
-    const throttle = new Throttle(Math.ceil((format.bitrate ?? 128000) / 8));
+    // bitrate is bits/sec, we need bytes/sec
+    const bytesPerSec = Math.ceil((format.bitrate ?? 128000) / 8);
     const stream = yt.download(info, { format });
 
-    stream.on("error", (err: Error) => {
-      console.error(err);
-      throttle.destroy(err);
-    });
+    stream.on("error", (err: Error) => console.error(err));
 
     // stop downloading if client leaves
-    request.signal.addEventListener("abort", () => {
-      stream.destroy();
-      throttle.destroy();
-    });
+    request.signal.addEventListener("abort", () => stream.destroy());
 
-    stream.pipe(throttle);
-
-    return new Response(Readable.toWeb(throttle) as ReadableStream, {
-      status: 200,
-      headers: { "Content-Type": "video/webm" },
-    });
+    return new Response(
+      (Readable.toWeb(stream) as ReadableStream<Uint8Array>).pipeThrough(
+        throttleStream(bytesPerSec)
+      ),
+      { status: 200, headers: { "Content-Type": "video/webm" } }
+    );
   } catch (err) {
     console.error(err);
     return json({ error: "Failed to fetch audio" }, 500);
