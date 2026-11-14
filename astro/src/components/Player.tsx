@@ -1,13 +1,8 @@
 //@ts-nocheck
 import React, { useEffect, useRef, useState } from 'react'
 import styles from "../styles/player.module.css"
-import { config } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import '@fortawesome/fontawesome-svg-core/styles.css'
-import { faPlus, faPause, faPlay, faCircleNotch, faForwardStep, faBackwardStep, faList } from '@fortawesome/free-solid-svg-icons';
 import Playlist from './Playlist';
-
-config.autoAddCss = false
+import { FaCircleNotch, FaList, FaPause, FaPlay, FaPlus, FaStepBackward, FaStepForward } from "react-icons/fa"
 
 const shuffle = (array) => {
     const arrayToShuffle = [...array];
@@ -289,7 +284,7 @@ export default function Player(props) {
                                     else
                                         setCurrentAudio(currentAudio - 1)
                                 }}>
-                                    <FontAwesomeIcon icon={faBackwardStep} />
+                                    <FaStepBackward />
                                 </div>
                                 <div className={styles.forwardStep}
 
@@ -299,7 +294,7 @@ export default function Player(props) {
                                         else
                                             setCurrentAudio(currentAudio + 1)
                                     }}>
-                                    <FontAwesomeIcon icon={faForwardStep} />
+                                    <FaStepForward />
                                 </div>
 
 
@@ -335,21 +330,21 @@ export default function Player(props) {
                 <div className={styles.playlistOpener} onClick={() => {
                     setPlaylistOpened(!playlistOpened);
                 }}>
-                    <FontAwesomeIcon icon={faList} />
+                    <FaList />
                 </div>
 
                 <div className={styles.startButton} onClick={() => {
                     setAudioPaused(!audioPaused);
                 }}>
                     <div className={styles.startRed} style={{
-                        display: audioPaused ? "block" : "none"
+                        display: audioPaused ? "flex" : "none"
                     }}>
-                        <FontAwesomeIcon icon={faPlay} />
+                        <FaPlay />
                     </div>
                     <div className={styles.stopRed} style={{
                         display: !audioPaused ? "block" : "none"
                     }}>
-                        <FontAwesomeIcon icon={faPause} />
+                        <FaPause />
                     </div>
                 </div>
 
@@ -359,16 +354,15 @@ export default function Player(props) {
                 }}>
                     <div className={styles.plusRotator} style={{
                         transform: "rotateZ(" + (formOpened ? "135deg" : "0deg") + ")",
-                        display: loaded ? "block" : "none"
+                        display: loaded ? "flex" : "none"
                     }}>
-                        <FontAwesomeIcon icon={faPlus} />
-
+                        <FaPlus />
                     </div>
 
                     <div className={styles.loader} style={{
                         display: loaded ? "none" : "block"
                     }}>
-                        <FontAwesomeIcon icon={faCircleNotch} />
+                        <FaCircleNotch />
                     </div>
 
                 </div>
