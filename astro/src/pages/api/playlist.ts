@@ -1,15 +1,14 @@
 import type { APIRoute } from "astro";
-import ytpl from "ytpl";
+import ytpl from "@distube/ytpl";
+
+export const prerender = false;
 
 export const GET: APIRoute = async ({ url }) => {
   const playlistLink = url.searchParams.get("link");
   const playlistPageLimit = Number(url.searchParams.get("limit")) || 100;
 
   if (!playlistLink) {
-    return new Response(JSON.stringify({ error: "Missing link" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json({ error: "Missing link" }, { status: 400 });
   }
 
   try {
@@ -19,18 +18,13 @@ export const GET: APIRoute = async ({ url }) => {
     const items = result.items.map((item) => ({
       id: item.id,
       title: item.title,
-      thumbnail: item.thumbnails[0]?.url,
-      duration: item.durationSec,
+      thumbnail: item.thumbnail,
+      duration: item.duration,
     }));
 
-    return new Response(JSON.stringify(items), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json(items);
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Invalid playlist" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error(error);
+    return Response.json({ error: "Invalid playlist" }, { status: 400 });
   }
 };

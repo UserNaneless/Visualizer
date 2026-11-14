@@ -16,6 +16,7 @@
     "@astrojs/cloudflare": "^14.4.8",
     "@astrojs/react": "^7.1.9",
     "@distube/ytdl-core": "^5.2.1",
+    "@distube/ytpl": "^1.2.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "astro": "^7.4.12",
