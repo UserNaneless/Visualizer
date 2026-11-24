@@ -9,7 +9,7 @@ import cloudflare from "@astrojs/cloudflare";
 // https://astro.build/config
 export default defineConfig({
     integrations: [react()],
-    site: "https://UserNaneless",
+    site: "https://usernaneless.github.io",
     base: "Visualizer",
 
     vite: {
