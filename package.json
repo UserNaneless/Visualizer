@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.8",
+    "@astrojs/node": "^11.1.14",
     "@astrojs/react": "^7.1.9",
     "@distube/ytdl-core": "^5.2.1",
     "@distube/ytpl": "^1.2.4",
