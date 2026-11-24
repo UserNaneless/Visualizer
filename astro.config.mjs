@@ -10,7 +10,7 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
     integrations: [react()],
     site: "https://usernaneless.github.io",
-    base: "Visualizer",
+    base: "/Visualizer",
 
     vite: {
         build: {
